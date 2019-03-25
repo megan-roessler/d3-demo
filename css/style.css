@@ -1,1 +1,27 @@
 /*Stylesheet by Megan Roessler, 2019*/
+/*Ex. 3.10, stylin' the axis*/
+.axis path,
+.axis lime {
+	fill: none;
+	stroke: black;
+	stroke-width: 1px;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+	font-family: sans-serif;
+	font-size: 0.9em;
+}
+
+/*Ex. 3.13, styling the title*/
+.title {
+	font-family: sans-serif;
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+/*Style labels*/
+.labels {
+	font-family: sans-serif;
+	font-size: 0.9em;
+}

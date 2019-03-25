@@ -1,130 +1,163 @@
 /*Javascript by Megan Roessler, 2019*/
-var mydiv = document.getElementById("mydiv");
-mydiv.innerHTML = "Hello World";
-
-//initialize function called when the script loads
-function initialize(){
-    cities();
-	addColumns();
-	addEvents();
-};
-
-//function to create a table with cities and their populations
-	function cities(){
-    //define two arrays for cities and population
-		var cities = [
-			'Madison',
-			'Seattle',
-			'Vancouver',
-			'Waco'
-		];
-		var population = [
-			233209,
-			724745,
-			631490,
-			136436,
-		];
-
-    //create the table element
-		var table = document.createElement("table");
-
-    //create a header row
-		var headerRow = document.createElement("tr");
-
-    //add the "City" column
-		var cityHeader = document.createElement("th");
-		cityHeader.innerHTML = "City";
-		headerRow.appendChild(cityHeader);
-
-    //add the "Population" column
-		var popHeader = document.createElement("th");
-		popHeader.innerHTML = "Population";
-		headerRow.appendChild(popHeader);
-
-    //add the row to the table
-		table.appendChild(headerRow);
-
-    //loop to add a new row for each city
-		for (var i = 0; i < cities.length; i++){
-			var tr = document.createElement("tr");
+window.onload = function(){
+	var w = 900, h = 500;
 	
-			var city = document.createElement("td");
-			city.innerHTML = cities[i];
-			tr.appendChild(city);
-
-			var pop = document.createElement("td");
-			pop.innerHTML = population[i];
-			tr.appendChild(pop);
-
-			table.appendChild(tr);
-		};
-
-    //add the table to the div in index.html
-		var mydiv = document.getElementById("mydiv");
-		mydiv.appendChild(table);
-};
-
-//added debug.js below
-function addColumns(cityPop){
-    
-    $('tr').each(function(i){
-
-    	if (i == 0){
-			//added missing letter to "append"
-    		$(this).append('<th>City Size</th>');
-    	} else {
-
-    		var citySize;
-
-    		if (cityPop[i-1].population < 100000){
-    			citySize = 'Small';
-			//changed citySize to camel case
-    		} else if (cityPop[i-1].population < 500000){
-    			citySize = 'Medium';
-
-    		} else {
-    			citySize = 'Large';
-    		};
-			//added parenthesis around "this"
-			//added missing > in '<td'
-    		$(this).append('<td>' + citySize + '</td>');
-    	};
-    });
-};
-
-function addEvents(){
-	//removed # from 'table'
-	$('table').mouseover(function(){
-		//removed ; listed as syntax error
-		var color = "rgb("
-
-		for (var i=0; i<3; i++){
-
-			var random = Math.round(Math.random() * 255);
-
-			color += "random";
-
-			if (i<2){
-				color += ",";
+	var container = d3.select("body") //Ex. 1.1, get body element from DOM
+		.append("svg") //Ex. 1.2, create svg element
+		.attr("width", w) //Ex. 1.3, assign width
+		.attr("height", h) //Ex. 1.3, assign height
+		.attr("class", "container") //Ex. 1.3, assign class
+		.style("background-color", "rgba(0,0,0,0.2)"); //Ex 1.4, add style
+		
+	var innerRect = container.append("rect") //Ex. 1.6, add innerRect block, add to svg
+		.datum(400) //Ex 1.7, add datum
+		.attr("width", function(d){ //Ex 1.8, rectangle width
+			return d * 2; // 400 * 2 = 800
+		})
+		.attr("height", function(d){ //Ex. 1.8, rectangle height
+			return d; //400
+		})
+		//Ex. 1.9, adding styles/attributes to rectangle
+		.attr("class", "innerRect")//class name
+		.attr("x", 50) //position from left on x
+		.attr("y", 50) //position from top on y
+		.style("fill", "#FFFFFF"); //add fill color
+		
+		//Ex. 2.3, add an array
+		//var dataArray = [10, 20, 30, 40, 50];
+		
+		//Ex. 2.8, city population data
+		var cityPop = [
+			{
+				city: 'Boca Raton',
+				population: 98150
+			},
+			{
+				city: 'Palm Springs', 
+				population: 48142
+			},
+			{
+				city: 'Atlantic City',
+				population: 38429
+			},
+			{
+				city: 'Honolulu',
+				population: 351792
+			}
+		];
+		
+		//Ex. 3.1, creating an x coord linear scale
+		var x = d3.scaleLinear()//create scale
+			.range([90, 715]) //min and max of output
+			.domain([0, 3]); //min and max of input
+		
+		//Ex. 3.3, max and min pop values
+		//find min value of array
+		var minPop = d3.min(cityPop, function(d){
+			return d.population;
+		});
+		//Ex. 3.3, max value of array
+		var maxPop = d3.max(cityPop, function(d){
+			return d.population;
+		});
+		//scale for circles center y coord
+		var y = d3.scaleLinear()
+			//Ex. 3.11, update y scale for axis
+			.range([450, 50]) //OLD --> 440, 95
+			.domain([0, 400000]); //OLD --> minPop, maxPop
 			
-			} else {
-				color += ")";
-		};
+		//Ex. 3.5, implementing a color scale
+		var color = d3.scaleLinear()
+			.range([
+				"#FDBE85",
+				"#D94701"
+			])
+			.domain([
+				minPop,
+				maxPop
+			]);
+		
+		//Ex. 3.6, create y axis
+		var yAxis = d3.axisLeft(y);
+		//Ex. 3.7/3.9, create g element and add axis
+		var axis = container.append("g")
+			.attr("class", "axis")
+			.attr("transform", "translate(50, 0)")
+			.call(yAxis);
+		//Ex. 3.8, invert call yAxis
+		yAxis(axis);
+		
+		//Ex. 3.12, adding a title
+		var title = container.append("text")
+			.attr("class", "title")
+			.attr("text-anchor", "middle")
+			.attr("x", 450)
+			.attr("y", 30)
+			.text("City Populations");
+			
+		//Ex. 3.14, creating citcle labels
+		var labels = container.selectAll(".labels")
+			.data(cityPop)
+			.enter()
+			.append("text")
+			.attr("class", "labels")
+			.attr("text-anchor", "left")
+			.attr("y", function(d){
+				//vertical pos centered on circle
+				return y(d.population);
+			});
+			
+		//Ex. 3.15, create <tspan> elements
+		var nameLine = labels.append("tspan")
+			.attr("class", "nameLine")
+			.attr("x", function(d,i){
+				//horizontal pos 2 right of circle
+				return x(i) + Math.sqrt(d.population * 0.01 / Math.PI) + 5;
+			})
+			.text(function(d){
+				return d.city;
+			});
+			
+		//Ex. 3.17, formatting population numbers
+		var format = d3.format(",");
+		
+		//Ex. 3.15, fix labels
+		var popLine = labels.append("tspan")
+			.attr("class", "popLine")
+			.attr("x", function(d,i){
+				return x(i) + Math.sqrt(d.population * 0.01 / Math.PI) + 5;
+			})
+			.attr("dy", "15") //Ex. 3.16, offsetting second line, set verticle offset
+			.text(function(d){
+				return "Pop. " + format(d.population);
+			});
+			
 
-		$(this).css('color', color);
-	//removed ) listed as syntax error
-	};
-
-	function clickme(){
-
-		alert('Hey, you clicked me!');
-	};
-
-	$('table').on('click', clickme);
-// added missing ) listed as syntax error
-});
-
-//call the initialize function when the window has loaded
-window.onload = initialize();
-//added missing }; listed as error
+		
+		//Ex. 2.4/2.8, add magic trio "the triple threat", use city data
+		var circles = container.selectAll(".circles")//THERE ARE NO CIRCLES
+			.data(cityPop)//feed array to circles
+			.enter()//poof, magic!
+			.append("circle")//Ex. 2.5, add circle for each datum
+			.attr("class", "circles") //apply class name 2 circles
+			.attr("id", function(d){ //Ex. 2.8, get city names
+				return d.city;
+			})
+				
+			.attr("r", function(d){//Ex. 2.6, define circle radius
+				//Ex. 2.8, calc radius from populations
+				var area = d.population * 0.01;
+				return Math.sqrt(area/Math.PI);
+			})
+			.attr("cx", function(d, i){ //Ex. 2.6/2.8/3.2, x coord
+				return x(i);//return 90 + (i * 180);
+			})
+			.attr("cy", function(d){ //Ex. 2.6/2.8, y coord
+				return y(d.population); //Ex. 3.4 and OLD --> return 450 - (d.population * 0.0005);
+			})
+			.style("fill", function(d, i){ //Ex. 3.5, add fill color
+				return color(d.population);
+			})
+			.style("stroke", "#000"); //Ex. 3.5, plain 'ol black stroke
+			
 };
